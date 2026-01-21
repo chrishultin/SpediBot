@@ -1,12 +1,13 @@
 package discord
 
 import (
-	pocketbaseint "backend/pocketbase"
 	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
+
+	pocketbaseint "github.com/spedione/SpediBot/backend/pocketbase"
 
 	"github.com/bwmarrin/discordgo"
 )

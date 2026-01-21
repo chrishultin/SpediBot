@@ -1,8 +1,8 @@
 package discord
 
 import (
-	"backend/pocketbase"
 	"fmt"
+	"github.com/spedione/SpediBot/backend/pocketbase"
 
 	"github.com/bwmarrin/discordgo"
 )

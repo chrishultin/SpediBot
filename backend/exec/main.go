@@ -1,11 +1,13 @@
 package main
 
 import (
-	"backend/discord"
+	"github.com/pocketbase/pocketbase/apis"
+	"github.com/spedione/SpediBot/backend/discord"
 	"log"
 	"os"
 
-	pocketbaseint "backend/pocketbase"
+	pocketbaseint "github.com/spedione/SpediBot/backend/pocketbase"
+	frontend "github.com/spedione/SpediBot/ui-embed"
 
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
@@ -39,6 +41,8 @@ func main() {
 				panic(err)
 			}
 		}()
+
+		e.Router.GET("/{path...}", apis.Static(frontend.EmbeddedUI, true))
 
 		return e.Next()
 	})
