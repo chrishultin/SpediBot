@@ -1,0 +1,8 @@
+SpediBot.iml
+backend.iml
+
+frontend/node_modules
+frontend/.vscode
+
+pb_data/*
+/.idea/
