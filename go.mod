@@ -1,4 +1,4 @@
-module github.com/spedione/SpediBot
+module github.com/chrishultin/SpediBot
 
 go 1.25.5
 

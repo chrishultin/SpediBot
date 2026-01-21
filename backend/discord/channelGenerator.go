@@ -2,7 +2,7 @@ package discord
 
 import (
 	"fmt"
-	"github.com/spedione/SpediBot/backend/pocketbase"
+	"github.com/chrishultin/SpediBot/backend/pocketbase"
 
 	"github.com/bwmarrin/discordgo"
 )

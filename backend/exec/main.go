@@ -1,13 +1,14 @@
 package main
 
 import (
-	"github.com/pocketbase/pocketbase/apis"
-	"github.com/spedione/SpediBot/backend/discord"
 	"log"
 	"os"
 
-	pocketbaseint "github.com/spedione/SpediBot/backend/pocketbase"
-	frontend "github.com/spedione/SpediBot/ui-embed"
+	"github.com/chrishultin/SpediBot/backend/discord"
+	"github.com/pocketbase/pocketbase/apis"
+
+	pocketbaseint "github.com/chrishultin/SpediBot/backend/pocketbase"
+	frontend "github.com/chrishultin/SpediBot/ui-embed"
 
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"

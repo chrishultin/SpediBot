@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	pocketbaseint "github.com/spedione/SpediBot/backend/pocketbase"
+	pocketbaseint "github.com/chrishultin/SpediBot/backend/pocketbase"
 
 	"github.com/bwmarrin/discordgo"
 )
