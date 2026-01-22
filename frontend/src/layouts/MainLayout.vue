@@ -8,33 +8,36 @@
           round
           icon="menu"
           aria-label="Menu"
-          @click="toggleLeftDrawer"
+          @click="sidebarOpen = !sidebarOpen"
         />
 
         <q-toolbar-title>
-          Quasar App
+          SpediBot
         </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
 
     <q-drawer
-      v-model="leftDrawerOpen"
+      v-model="sidebarOpen"
       show-if-above
       bordered
     >
       <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
+        <q-item clickable @click="handleClickHome">
+          Home
+        </q-item>
+        <q-item-label header>
+          Servers
         </q-item-label>
 
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
+        <sidebar-server-link
+          v-for="server in pb.servers"
+          v-bind:key="server.id"
+          :serverID="server.id"
+          :serverName="server.name"
+          :iconURL="server.icon"
+          :description="server.description"
         />
       </q-list>
     </q-drawer>
@@ -45,58 +48,41 @@
   </q-layout>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue';
-import EssentialLink, { EssentialLinkProps } from 'components/EssentialLink.vue';
+<script lang="ts">
+import {defineComponent, ref} from 'vue';
+// import type {Ref} from 'vue';
+import SidebarServerLink from "components/SidebarServerLink.vue";
+import {usePocketBase} from "src/stores/pocketbase";
+import {useRouter} from "vue-router";
 
-const essentialLinks: EssentialLinkProps[] = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
+// interface Server {
+//   name: string;
+//   id: string;
+//   description: string;
+//   icon: string;
+// }
+
+export default defineComponent({
+  name: 'MainLayout',
+  props: {
   },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
+  components: {
+    SidebarServerLink
   },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
+  methods: {
+    async handleClickHome() {
+      await this.router.push("/")
+    }
   },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
+  mounted() {
+    this.pb.getServers()
   },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
+  setup () {
+    // const servers: Ref<Server[], Server[]> = ref([])
+    const sidebarOpen = ref(false)
+    const pb = usePocketBase();
+    const router = useRouter()
+    return { sidebarOpen, pb, router };
   }
-];
-
-const leftDrawerOpen = ref(false)
-
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value
-}
+});
 </script>

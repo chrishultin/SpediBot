@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/chrishultin/SpediBot/backend/discord"
+	"github.com/chrishultin/SpediBot/backend/handlers"
 	"github.com/pocketbase/pocketbase/apis"
 
 	pocketbaseint "github.com/chrishultin/SpediBot/backend/pocketbase"
@@ -28,7 +29,7 @@ func main() {
 		Automigrate: DEV_MODE,
 	})
 
-	bot := discord.Bot{
+	bot := &discord.Bot{
 		AppID:            APP_ID,
 		Token:            DISCORD_TOKEN,
 		PocketBaseClient: &pocketbaseint.Client{PocketBase: app},
@@ -44,6 +45,7 @@ func main() {
 		}()
 
 		e.Router.GET("/{path...}", apis.Static(frontend.EmbeddedUI, true))
+		e.Router.GET("/api/custom/servers", handlers.GetServers(bot))
 
 		return e.Next()
 	})

@@ -1,42 +1,35 @@
 <template>
   <q-page class="row items-center justify-evenly">
-    <example-component
-      title="Example component"
-      active
-      :todos="todos"
-      :meta="meta"
-    ></example-component>
+    <q-card class="col-8 col-sm-12 col-md-8 col-lg-4" v-for="server in pb.servers" v-bind:key="server.id" style="min-height: 400px">
+      <server-card-component :serverID="server.id" :serverName="server.name" :iconURL="server.icon" :description="server.description"/>
+    </q-card>
   </q-page>
 </template>
 
-<script setup lang="ts">
-import { Todo, Meta } from 'components/models';
-import ExampleComponent from 'components/ExampleComponent.vue';
-import { ref } from 'vue';
+<script lang="ts">
+import ServerCardComponent from "components/ServerCardComponent.vue";
+import {defineComponent, ref} from "vue";
+// import SidebarServerLink from "components/SidebarServerLink.vue";
+import {usePocketBase} from "stores/pocketbase";
 
-const todos = ref<Todo[]>([
-  {
-    id: 1,
-    content: 'ct1'
+export default defineComponent({
+  name: 'IndexPage',
+  props: {
   },
-  {
-    id: 2,
-    content: 'ct2'
+  components: {
+    ServerCardComponent
   },
-  {
-    id: 3,
-    content: 'ct3'
+  methods: {
+
   },
-  {
-    id: 4,
-    content: 'ct4'
+  mounted() {
+    this.pb.getServers()
   },
-  {
-    id: 5,
-    content: 'ct5'
+  setup () {
+    // const servers: Ref<Server[], Server[]> = ref([])
+    const sidebarOpen = ref(false)
+    const pb = usePocketBase();
+    return { sidebarOpen, pb };
   }
-]);
-const meta = ref<Meta>({
-  totalCount: 1200
 });
 </script>

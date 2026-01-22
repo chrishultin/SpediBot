@@ -18,6 +18,7 @@ type Bot struct {
 
 	PocketBaseClient *pocketbaseint.Client
 	Logger           *slog.Logger
+	Session          *discordgo.Session
 }
 
 func (b *Bot) Serve() error {
@@ -36,6 +37,8 @@ func (b *Bot) Serve() error {
 	if err != nil {
 		panic(err)
 	}
+	b.Session = session
+
 	defer func(s *discordgo.Session) {
 		err := s.Close()
 		if err != nil {
