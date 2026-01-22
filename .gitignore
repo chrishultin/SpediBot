@@ -1,9 +1,10 @@
 SpediBot.iml
 backend.iml
 
-frontend/node_modules/*
-frontend/.vscode
-frontend/quasar.config.ts.*
+/frontend/node_modules
+/frontend/.vscode
+/frontend/quasar.config.ts.*
 
-pb_data/*
+/pb_data/*
 /.idea/
+/node_modules
