@@ -43,7 +43,7 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <router-view :key="route.path"/>
     </q-page-container>
   </q-layout>
 </template>
@@ -53,7 +53,7 @@ import {defineComponent, ref} from 'vue';
 // import type {Ref} from 'vue';
 import SidebarServerLink from "components/SidebarServerLink.vue";
 import {usePocketBase} from "src/stores/pocketbase";
-import {useRouter} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 
 // interface Server {
 //   name: string;
@@ -82,7 +82,8 @@ export default defineComponent({
     const sidebarOpen = ref(false)
     const pb = usePocketBase();
     const router = useRouter()
-    return { sidebarOpen, pb, router };
+    const route = useRoute();
+    return { sidebarOpen, pb, router, route };
   }
 });
 </script>

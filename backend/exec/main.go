@@ -46,6 +46,7 @@ func main() {
 
 		e.Router.GET("/{path...}", apis.Static(frontend.EmbeddedUI, true))
 		e.Router.GET("/api/custom/servers", handlers.GetServers(bot))
+		e.Router.GET("/api/custom/servers/{serverID}/channels", handlers.GetChannelsForServer(bot))
 
 		return e.Next()
 	})

@@ -17,3 +17,14 @@ func (b *Bot) UsersInVoiceChannel(discord *discordgo.Session, serverID, channelI
 	}
 	return members, nil
 }
+
+func (b *Bot) ChannelsForServer(serverID string) ([]*discordgo.Channel, error) {
+	var output []*discordgo.Channel
+
+	guild, err := b.Session.State.Guild(serverID)
+	if err != nil {
+		return output, err
+	}
+
+	return guild.Channels, nil
+}

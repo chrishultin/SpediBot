@@ -4,33 +4,40 @@
       <q-card-section class="bg-primary text-h4 text-white">
         {{ server?.name }}
       </q-card-section>
+      <q-card-section>
+        <manage-channel-generators-card :serverID="serverID"/>
+      </q-card-section>
     </q-card>
   </q-page>
 </template>
 
 <script lang="ts">
-import {computed, defineComponent, ref} from "vue";
+import {computed, defineComponent, reactive, ref} from "vue";
 import {usePocketBase} from "stores/pocketbase";
 import {useRoute} from "vue-router";
+import ManageChannelGeneratorsCard from "components/ManageChannelGeneratorsCard.vue";
 
 export default defineComponent({
   name: 'ManageServerPage',
   props: {
   },
   components: {
+    ManageChannelGeneratorsCard
   },
   methods: {
 
   },
-  mounted() {},
+  mounted() {
+    this.pb.getChannels(this.serverID)
+  },
   setup () {
-    // const servers: Ref<Server[], Server[]> = ref([])
     const sidebarOpen = ref(false)
     const pb = usePocketBase();
     const route = useRoute()
     const serverID: string = route.params.serverID ? route.params.serverID.toString() : ''
     const server = computed(() => pb.getServer(serverID))
-    return { sidebarOpen, pb, serverID, server };
+    const channels = reactive(pb.channels)
+    return { sidebarOpen, pb, serverID, server, channels};
   }
 });
 </script>

@@ -23,7 +23,6 @@ export default defineComponent({
 
   },
   mounted() {
-    this.pb.getServers()
   },
   setup () {
     // const servers: Ref<Server[], Server[]> = ref([])
