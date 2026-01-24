@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/chrishultin/SpediBot/backend/discord"
 	"github.com/pocketbase/pocketbase/core"
 )
@@ -60,13 +61,16 @@ func GetChannelsForServer(discordBot *discord.Bot) func(e *core.RequestEvent) er
 			return e.Error(http.StatusBadRequest, "could not get channels for server: "+serverID, err)
 		}
 
-		output := make([]GetChannelsForServerChannel, len(channels))
-		for i, channel := range channels {
-			output[i] = GetChannelsForServerChannel{
+		output := make([]GetChannelsForServerChannel, 0)
+		for _, channel := range channels {
+			if channel.Type != discordgo.ChannelTypeGuildVoice {
+				continue
+			}
+			output = append(output, GetChannelsForServerChannel{
 				Name:     channel.Name,
 				ID:       channel.ID,
 				ServerID: channel.GuildID,
-			}
+			})
 		}
 		return e.JSON(http.StatusOK, GetChannelsForServerResponse{Channels: output})
 	}
