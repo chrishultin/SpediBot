@@ -1,5 +1,6 @@
-import { defineStore, acceptHMRUpdate } from 'pinia';
+import {defineStore, acceptHMRUpdate} from 'pinia';
 import PocketBase from "pocketbase";
+import {ref} from "vue";
 
 export interface discordServer {
   name: string;
@@ -21,7 +22,8 @@ export interface channelGeneratorConfig {
   nameFormat: string;
   enableRename: boolean;
 }
-const pb = new PocketBase(process.env.DEV?process.env.API_DEV:process.env.API)
+
+const pb = new PocketBase(process.env.DEV ? process.env.API_DEV : process.env.API)
 
 export const usePocketBase = defineStore('pocketbase', {
   state: () => ({
@@ -29,53 +31,40 @@ export const usePocketBase = defineStore('pocketbase', {
     channelsMap: new Map<string, discordChannel>,
     channels: new Map<string, string[]>,
     channelGeneratorConfigsMap: new Map<string, channelGeneratorConfig>,
-    channelGeneratorConfigs: new Map<string, string[]>
+    channelGeneratorConfigs: new Map<string, string[]>,
+    channelsLoading: ref(false),
+    channelGeneratorConfigsLoading: ref(false),
   }),
-  getters: {
-  },
+  getters: {},
   actions: {
-    getServers() {
-      pb.send("/api/custom/servers", {method:"GET"}).
-        then((resp) => {
-          this.servers = resp.servers
-        }).
-        catch((err) => {
-          console.log(err)
-      })
+    async getServers() {
+      const resp = await pb.send("/api/custom/servers", {method: "GET"})
+      this.servers = resp.servers
     },
-    getChannels(serverID: string) {
+    async getChannels(serverID: string) {
       if (this.channels.has(serverID)) {
         return
       }
-      pb.send(`/api/custom/servers/${serverID}/channels`, {method: "GET"}).
-        then((resp) => {
-          const channels: string[] = []
-          for (const channel of resp.channels) {
-            this.channelsMap.set(channel.id, channel)
-            channels.push(channel.id)
-          }
-          this.channels.set(serverID, channels)
-        }).
-        catch((err) => {
-          console.log(err)
-        })
+      const resp = await pb.send(`/api/custom/servers/${serverID}/channels`, {method: "GET"})
+      const channels: string[] = []
+      for (const channel of resp.channels) {
+        this.channelsMap.set(channel.id, channel)
+        channels.push(channel.id)
+      }
+      this.channels.set(serverID, channels)
     },
-    getChannelGeneratorConfigs(serverID: string) {
+    async getChannelGeneratorConfigs(serverID: string) {
       if (this.channelGeneratorConfigs.has(serverID)) {
         return
       }
-      pb.send(`/api/custom/servers/${serverID}/channel_generators`, {method: "GET"}).
-      then((resp) => {
-        const configs: string[] = []
-        for (const config of resp.configs) {
-          configs.push(config.id)
-          this.channelGeneratorConfigsMap.set(config.id, config)
-        }
-        this.channelGeneratorConfigs.set(serverID, configs)
-      }).
-      catch((err) => {
-        console.log(err)
-      })
+      const resp = await pb.send(`/api/custom/servers/${serverID}/channel_generators`, {method: "GET"})
+      const configs: string[] = []
+      for (const config of resp.configs) {
+        configs.push(config.id)
+        this.channelGeneratorConfigsMap.set(config.id, config)
+      }
+      this.channelGeneratorConfigs.set(serverID, configs)
+      this.channelGeneratorConfigsLoading = false
     },
     getServer(serverID: string) {
       for (const server of this.servers) {
@@ -83,6 +72,18 @@ export const usePocketBase = defineStore('pocketbase', {
           return server
         }
       }
+    },
+    async updateConfig(config: channelGeneratorConfig) {
+      return pb.send(`/api/custom/servers/${config.serverId}/channel_generators`, {
+        method: "POST", body: JSON.stringify({
+          id: config.id,
+          channelId: config.channelId,
+          nameFormat: config.nameFormat,
+          enableRename: config.enableRename,
+        })
+      }).then((res) => {
+        this.channelGeneratorConfigsMap.set(res.config.id, config)
+      })
     }
   }
 });

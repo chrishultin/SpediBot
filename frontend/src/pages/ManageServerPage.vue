@@ -34,7 +34,6 @@ export default defineComponent({
     const pb = usePocketBase();
     const route = useRoute()
     const serverID: string = route.params.serverID ? route.params.serverID.toString() : ''
-    pb.getChannels(serverID)
     const server = computed(() => pb.getServer(serverID))
     const channels = reactive(pb.channels)
     return { sidebarOpen, pb, serverID, server, channels};

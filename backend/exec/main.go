@@ -48,6 +48,7 @@ func main() {
 		e.Router.GET("/api/custom/servers", handlers.GetServers(bot))
 		e.Router.GET("/api/custom/servers/{serverID}/channels", handlers.GetChannelsForServer(bot))
 		e.Router.GET("/api/custom/servers/{serverID}/channel_generators", handlers.HandleGetChannelGeneratorConfigs)
+		e.Router.POST("/api/custom/servers/{serverID}/channel_generators", handlers.HandleUpdateChannelGeneratorConfig(bot))
 
 		return e.Next()
 	})

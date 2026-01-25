@@ -30,20 +30,21 @@
         <q-item-label header>
           Servers
         </q-item-label>
-
-        <sidebar-server-link
-          v-for="server in pb.servers"
-          v-bind:key="server.id"
-          :serverID="server.id"
-          :serverName="server.name"
-          :iconURL="server.icon"
-          :description="server.description"
-        />
+        <span v-if="!loading">
+          <sidebar-server-link
+            v-for="server in pb.servers"
+            v-bind:key="server.id"
+            :serverID="server.id"
+            :serverName="server.name"
+            :iconURL="server.icon"
+            :description="server.description"
+          />
+        </span>
       </q-list>
     </q-drawer>
 
     <q-page-container>
-      <router-view :key="route.path"/>
+      <router-view v-if="!loading" :key="route.fullPath"/>
     </q-page-container>
   </q-layout>
 </template>
@@ -75,15 +76,15 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.pb.getServers()
+    this.pb.getServers().then(() => {this.loading = false}).catch((err) => {console.log(err)})
   },
   setup () {
-    // const servers: Ref<Server[], Server[]> = ref([])
     const sidebarOpen = ref(false)
     const pb = usePocketBase();
     const router = useRouter()
     const route = useRoute();
-    return { sidebarOpen, pb, router, route };
+    const loading = ref(true)
+    return { sidebarOpen, pb, router, route, loading };
   }
 });
 </script>

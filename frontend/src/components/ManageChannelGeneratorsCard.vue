@@ -9,12 +9,14 @@
       <q-card-section>
         <q-list
           bordered
+          v-if="!loading"
           >
           <manage-channel-generator
             v-for="config in pb.channelGeneratorConfigs.get(props.serverID)"
             v-bind:key="config"
             :serverID="props.serverID"
-            :configID="config" />
+            :configID="config"
+          />
 
         </q-list>
       </q-card-section>
@@ -23,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref} from 'vue';
+import { defineComponent, ref} from 'vue';
 import {useRouter} from "vue-router";
 import {usePocketBase} from "stores/pocketbase";
 import ManageChannelGenerator from "components/ManageChannelGenerator.vue";
@@ -39,14 +41,21 @@ export default defineComponent({
       required: true,
     },
   },
-  mounted () {
-    this.pb.getChannelGeneratorConfigs(this.serverID)
+  watch: {
+
+  },
+  async mounted () {
+    await this.pb.getChannelGeneratorConfigs(this.serverID)
+    await this.pb.getChannels(this.serverID)
+
+    this.loading = false
   },
   setup (props) {
     const expanded = ref(true)
     const router = useRouter()
     const pb = usePocketBase()
-    return {router, pb, expanded, props}
+    const loading = ref(true)
+    return {router, pb, expanded, props, loading}
   }
 });
 </script>

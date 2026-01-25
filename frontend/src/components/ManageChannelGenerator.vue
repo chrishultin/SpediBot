@@ -1,7 +1,6 @@
 <template>
   <q-expansion-item
     expand-separator
-    default-opened
     :label="channelName"
   >
     <q-card>
@@ -29,17 +28,21 @@
           map-options
           emit-value/>
       </q-card-section>
+      <q-card-section>
+        <q-toggle v-model="enableRename" label="Allow Owner To Rename Channel" @click="interactedRename = true"/>
+      </q-card-section>
       <q-card-actions align="right">
-        <q-btn label="Save" color="primary" rounded :disable="saveDisabled"/>
+        <q-btn label="Save" color="primary" rounded :disable="saveDisabled" @click="handleSave"/>
       </q-card-actions>
     </q-card>
   </q-expansion-item>
 </template>
 
 <script lang="ts">
-import {reactive, defineComponent, ref, computed, type ComputedRef} from 'vue';
+import {defineComponent, ref, computed, type ComputedRef} from 'vue';
 import {useRouter} from "vue-router";
-import {type channelGeneratorConfig, usePocketBase} from "stores/pocketbase";
+import { type channelGeneratorConfig, usePocketBase} from "stores/pocketbase";
+import {useQuasar} from "quasar";
 
 interface channelChoice {
   name: string;
@@ -49,7 +52,32 @@ interface channelChoice {
 export default defineComponent({
   name: 'ManageChannelGenerator',
   components: {},
-  methods: {},
+  methods: {
+    handleSave() {
+      this.pb.updateConfig({
+        channelId: this.channelChoice,
+        enableRename: this.enableRename,
+        nameFormat: this.nameChoice,
+        serverId: this.serverID,
+        id: this.configID
+      }).then(() => {
+        this.config = this.pb.channelGeneratorConfigsMap.get(this.configID)!
+        const channel = this.pb.channelsMap.get(this.config.channelId)
+        this.channelName = channel!.name
+        this.q.notify({
+          type: "positive",
+          message: "Channel Generator Saved",
+          timeout: 5000
+        })
+      }).catch(() => {
+        this.q.notify({
+          type: "negative",
+          message: "Something went wrong...",
+          timeout: 5000
+        })
+      })
+    }
+  },
   props: {
     serverID: {
       type: String,
@@ -61,33 +89,37 @@ export default defineComponent({
     }
   },
   watch: {
-    config(newConf: channelGeneratorConfig) {
-      const channel = this.pb.channelsMap.get(newConf.channelId)
-      if (channel != undefined) {
-        this.channelName = channel.name
-      }
+    nameChoice() {
+      this.saveDisabled = (this.nameChoice == this.startingNameFormat && this.startingChannel == this.channelChoice) || this.interactedRename
     },
-    nameChoice(newFormat: string) {
-      this.saveDisabled = (newFormat != this.startingNameFormat || this.startingChannel != this.channelChoice)
+    channelChoice() {
+      this.saveDisabled = (this.nameChoice == this.startingNameFormat && this.channelChoice == this.startingChannel) || this.interactedRename
     },
-    channelChoice(newChannel: string) {
-      this.saveDisabled = (this.nameChoice != this.startingNameFormat || newChannel != this.channelChoice)
-    }
+    enableRename() {
+      this.saveDisabled = (this.nameChoice == this.startingNameFormat && this.startingChannel == this.channelChoice) || this.interactedRename
+    },
   },
-  mounted() {
+  async mounted() {
+    await this.pb.getChannelGeneratorConfigs(this.serverID)
+    await this.pb.getChannels(this.serverID)
+    this.config = this.pb.channelGeneratorConfigsMap.get(this.configID)!
     const channel = this.pb.channelsMap.get(this.config.channelId)
-    if (channel != undefined) {
-      this.channelName = channel.name
-    }
+
+    this.enableRename = this.config.enableRename
+    this.channelName = channel!.name
+    this.channelChoice = channel!.id
+    this.nameChoice = this.config.nameFormat
+    this.startingNameFormat = this.config.nameFormat
+    this.startingChannel = this.config.channelId
   },
   setup(props) {
     const expanded = ref(true)
     const router = useRouter()
     const pb = usePocketBase()
-    const config = reactive(pb.channelGeneratorConfigsMap.get(props.configID)!)
+    const config = ref({} as channelGeneratorConfig)
     const channelName = ref("Loading")
     const label = ref("")
-    const channelChoice = ref(config.channelId)
+    const channelChoice = ref(config.value.channelId)
     const channelOptions: ComputedRef<channelChoice[]> = computed(() => {
       const channels = [] as channelChoice[]
       for (const channel of pb.channels.get(props.serverID)!) {
@@ -102,10 +134,15 @@ export default defineComponent({
     const nameOptions = [{value: "owner", label: "By Owner's Name"}, {value: "index", label: "By Index"}]
     const nameChoice = ref("index")
 
-    const startingChannel = config.channelId
-    const startingNameFormat = config.nameFormat
+    const startingChannel = ref("")
+    const startingNameFormat = ref("")
 
     const saveDisabled = ref(true)
+
+    const enableRename = ref(false)
+    const interactedRename = ref(false)
+
+    const q = useQuasar()
 
     return {
       router,
@@ -121,7 +158,10 @@ export default defineComponent({
       nameChoice,
       startingChannel,
       startingNameFormat,
-      saveDisabled
+      saveDisabled,
+      enableRename,
+      interactedRename,
+      q
     }
   }
 });
